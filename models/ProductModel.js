@@ -1,46 +1,56 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
+const Review = require("./ReviewModel");
+const imageSchema = mongoose.Schema({ path: { type: String, required: true } });
 
-const productSchema = mongoose.Schema({
+const productSchema = mongoose.Schema(
+  {
     name: {
-        type: String,
-        required: true,
-        unique: true,
+      type: String,
+      required: true,
+      unique: true,
     },
     description: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     category: {
-        type: String,
-        required: true,
-    }, 
+      type: String,
+      required: true,
+    },
     count: {
-        type: Number, 
-        required: true,
-    }, 
+      type: Number,
+      required: true,
+    },
     price: {
-        type: Number,
-        required: true,
+      type: Number,
+      required: true,
     },
     rating: {
-        type: Number
+      type: Number,
     },
     reviewsNumber: {
-        type: Number,
-    }, 
+      type: Number,
+    },
     sales: {
-        type: Number,
-        default: 0,
-    }, 
+      type: Number,
+      default: 0,
+    },
     attrs: { key: { type: String }, value: { type: String } },
-    images: [],
-    reviews: [],
-}, {
-    timestamps: true
-})
+    images: [imageSchema],
+    reviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: Review,
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
 
-productSchema.index()
+productSchema.index();
 
-const Product = mongoose.model("Product", productSchema)
+const Product = mongoose.model("Product", productSchema);
 
 module.exports = Product;
