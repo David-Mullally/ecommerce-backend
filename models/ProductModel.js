@@ -49,8 +49,13 @@ const productSchema = mongoose.Schema(
   }
 );
 
-productSchema.index();
-
 const Product = mongoose.model("Product", productSchema);
+
+//compound indexes which will allow for more efficient searching in MongoDB
+productSchema.index(
+  { name: "text", description: "text" },
+  { name: "TextIndex" }
+);
+productSchema.index({ "attrs.key": 1, "attrs.value": 1 }); //key and values will be organized in ascending order in DB (1 ascending, -1 for descending)
 
 module.exports = Product;
