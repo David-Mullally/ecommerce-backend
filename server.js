@@ -4,6 +4,8 @@ const app = express();
 
 const port = 3001;
 
+app.use(express.json())
+
 const apiRoutes = require("./routes/apiRoutes");
 
 app.get("/", async (req, res, next) => {

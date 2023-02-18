@@ -9,4 +9,16 @@ const getCategories = async(req, res, next) => {
     }
 }
 
-module.exports = getCategories;
+const newCategory = async (req, res, next) => {
+    try {
+        //res.send(!!req.body)
+        const { category } = req.body
+        if (!category) {
+            throw new Error("Category name is a required field")
+        }
+        res.send(category)
+    } catch (error) {
+        next(error)
+    }
+}
+module.exports = {getCategories, newCategory};
