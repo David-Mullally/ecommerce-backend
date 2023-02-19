@@ -9,7 +9,6 @@ app.use(express.json())
 const apiRoutes = require("./routes/apiRoutes");
 
 app.get("/", async (req, res, next) => {
-  const Product = require("./models/ProductModel");
   try {
   } catch (err) {
     next(err);
@@ -35,10 +34,6 @@ app.use((error, req, res, next) => {
 app.use((error, req, res, next) => {
   console.log(error);
   next(error);
-});
-
-app.get("/api/products", (req, res) => {
-  res.send("Handling product routes.");
 });
 
 app.listen(port, () => {
