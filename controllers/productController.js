@@ -125,10 +125,12 @@ const getBestsellers = async (req, res, next) => {
   try {
     const products = await Product.aggregate([
       { $sort: { category: 1, sales: -1 } },
-      { $group: { _id: "$category", doc_with_max_sales: { $first: "$$ROOT" } } },
+      {
+        $group: { _id: "$category", doc_with_max_sales: { $first: "$$ROOT" } },
+      },
       { $replaceWith: "$doc_with_max_sales" },
-      { $match:{ sales: {$gt: 0}} },
-      { $project: {_id: 1, name: 1, images: 1, category: 1, description: 1}},
+      { $match: { sales: { $gt: 0 } } },
+      { $project: { _id: 1, name: 1, images: 1, category: 1, description: 1 } },
       { $limit: 3 },
     ]);
     res.json(products);
@@ -137,4 +139,20 @@ const getBestsellers = async (req, res, next) => {
   }
 };
 
-module.exports = { getProducts, getProductById, getBestsellers };
+const adminGetProducts = async (req, res, next) => {
+  try {
+    const products = await Product.find({})
+      .sort({ category: 1 })
+      .select("name price category");
+    return res.json(products)
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  getProducts,
+  getProductById,
+  getBestsellers,
+  adminGetProducts,
+};
