@@ -145,20 +145,45 @@ const adminGetProducts = async (req, res, next) => {
     const products = await Product.find({})
       .sort({ category: 1 })
       .select("name price category");
-    return res.json(products)
+    return res.json(products);
   } catch (error) {
     next(error);
   }
 };
 
 const adminDeleteProduct = async (req, res, next) => {
-  console.log(req.params.id)
+  console.log(req.params.id);
   try {
-    const product = await Product.findById(req.params.id).orFail()
-    await product.remove()
-    res.json({message: "product deleted"})
+    const product = await Product.findById(req.params.id).orFail();
+    await product.remove();
+    res.json({ message: "product deleted" });
   } catch (error) {
-    next(error)
+    next(error);
+  }
+};
+
+const adminCreateProduct = async (req, res, next) => {
+  try {
+    const product = new Product();
+    const { name, description, count, price, category, attributesTable } =
+      req.body;
+    product.name = name;
+    product.description = description;
+    product.count = count;
+    product.price = price;
+    product.category = category;
+    if (attributesTable.length > 0) {
+      attributesTable.map((item) => {
+        product.attrs.push(item);
+      });
+    }
+    await product.save();
+    res.json({
+      message: "Product created",
+      productId: product._id,
+    });
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -167,5 +192,6 @@ module.exports = {
   getProductById,
   getBestsellers,
   adminGetProducts,
-  adminDeleteProduct
+  adminDeleteProduct,
+  adminCreateProduct,
 };
