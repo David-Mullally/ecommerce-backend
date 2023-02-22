@@ -16,11 +16,22 @@ const getProducts = async (req, res, next) => {
     if (req.query.rating) {
       queryCondition = true;
       ratingQueryCondition = { rating: { $in: req.query.rating.split(",") } };
-    }
+      }
+      
+      let categoryQueryCondition = {}
+      const categoryName = req.params.categoryName || ""
+      console.log(categoryName)
+      if (categoryName) {
+          queryCondition = true
+          let a = categoryName.replaceAll(",", "/")
+          var regEx = new RegExp("^" + a)
+          categoryQueryCondition = { category: regEx }
+          console.log(regEx)
+      }
 
-    if (!queryCondition) {
+    if (queryCondition) {
       query = {
-        $and: [priceQueryCondition, ratingQueryCondition],
+        $and: [priceQueryCondition, ratingQueryCondition, categoryQueryCondition],
       };
     }
 
