@@ -29,27 +29,34 @@ const getProducts = async (req, res, next) => {
       console.log(regEx);
     }
 
-  
     if (req.query.category) {
       queryCondition = true;
       let a = req.query.category.split(",").map((item) => {
-        if(item) return new RegExp("^" + item)
-      })
-       console.log(a)
+        if (item) return new RegExp("^" + item);
+      });
       categoryQueryCondition = {
-        category: { $in: a }
-      }
-      console.log(categoryQueryCondition)
+        category: { $in: a },
+      };
     }
 
-    if (queryCondition) {
-      query = {
-        $and: [
-          priceQueryCondition,
-          ratingQueryCondition,
-          categoryQueryCondition,
-        ],
-      };
+    let attrsQueryCondition = [];
+    if (req.query.attrs) {
+      // attrs=RAM-1TB-2TB-4TB, color-blue-red
+      attrsQueryCondition = req.query.attrs.split(",").reduce((acc, item) => {
+        if (item) {
+          let a = item.split("-");
+          let values = [...a];
+          values.shift(); // removes first item ..in this case the key
+          let a1 = {
+            attrs: { $elemMatch: { key: a[0], value: { $in: values } } },
+          };
+          console.log(values);
+          acc.push(a1);
+          //console.dir(acc, { depth: null })
+          return acc;
+        } else return acc;
+      }, []);
+      queryCondition = true;
     }
 
     //pagination
@@ -59,14 +66,37 @@ const getProducts = async (req, res, next) => {
     // sort by name, price etc based on input on frontend
     let sort = {};
     const sortOption = req.query.sort || "";
-    //console.log(sortOption)
     if (sortOption) {
       let sortOpt = sortOption.split("_");
       sort = { [sortOpt[0]]: Number(sortOpt[1]) }; // NOTE: [] used here to create dynamic key name
-      //console.log(sort)
     }
+
+    const searchQuery = req.params.searchQuery || "";
+    let searchQueryCondition = {};
+    if (searchQuery) {
+      queryCondition = true;
+      searchQueryCondition = { $text: { $search: searchQuery } };
+      select = {
+        score: { $meta: "textScore" },
+      };
+      sort = { score: { $meta: "textScore" } };
+    }
+
+    if (queryCondition) {
+      query = {
+        $and: [
+          priceQueryCondition,
+          ratingQueryCondition,
+          categoryQueryCondition,
+          searchQueryCondition,
+          ...attrsQueryCondition,
+        ],
+      };
+    }
+
     const totalProducts = await Product.countDocuments({});
     const products = await Product.find(query)
+      .select(select)
       .skip(recordsPerPage * (pageNum - 1))
       .sort(sort)
       .limit(recordsPerPage);
