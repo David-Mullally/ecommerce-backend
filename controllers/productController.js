@@ -110,13 +110,31 @@ const getProducts = async (req, res, next) => {
   }
 };
 
-const getProductById = async(req, res, next) => {
+const getProductById = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id).populate("reviews").orFail()
-    res.json(product)
+    const product = await Product.findById(req.params.id)
+      .populate("reviews")
+      .orFail();
+    res.json(product);
   } catch (error) {
-    next(error)
-  } 
-}
+    next(error);
+  }
+};
 
-module.exports = {getProducts, getProductById};
+const getBestsellers = async (req, res, next) => {
+  try {
+    const products = await Product.aggregate([
+      { $sort: { category: 1, sales: -1 } },
+      { $group: { _id: "$category", doc_with_max_sales: { $first: "$$ROOT" } } },
+      { $replaceWith: "$doc_with_max_sales" },
+      { $match:{ sales: {$gt: 0}} },
+      { $project: {_id: 1, name: 1, images: 1, category: 1, description: 1}},
+      { $limit: 3 },
+    ]);
+    res.json(products);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { getProducts, getProductById, getBestsellers };
