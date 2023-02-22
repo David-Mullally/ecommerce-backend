@@ -73,6 +73,7 @@ const getProducts = async (req, res, next) => {
 
     const searchQuery = req.params.searchQuery || "";
     let searchQueryCondition = {};
+    let select;
     if (searchQuery) {
       queryCondition = true;
       searchQueryCondition = { $text: { $search: searchQuery } };
@@ -150,9 +151,21 @@ const adminGetProducts = async (req, res, next) => {
   }
 };
 
+const adminDeleteProduct = async (req, res, next) => {
+  console.log(req.params.id)
+  try {
+    const product = await Product.findById(req.params.id).orFail()
+    await product.remove()
+    res.json({message: "product deleted"})
+  } catch (error) {
+    next(error)
+  }
+};
+
 module.exports = {
   getProducts,
   getProductById,
   getBestsellers,
   adminGetProducts,
+  adminDeleteProduct
 };
