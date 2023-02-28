@@ -211,7 +211,23 @@ const adminUpdateProduct = async (req, res, next) => {
   } catch (error) {
     next(error)
   }
+};
+
+const adminUpload = async (req, res, next) => {
+  try {
+    if (!req.files || !!req.files.images === false) {
+      return res.status(400).send("No files were uploaded")
+    }
+    if (Array.isArray(req.files.images)) {
+      res.send(`You sent ${req.files.images.length} images`)
+    }
+    res.send("one image sent")
+  } catch (error) {
+    next(error)
+  }
 }
+
+
 
 module.exports = {
   getProducts,
@@ -220,5 +236,6 @@ module.exports = {
   adminGetProducts,
   adminDeleteProduct,
   adminCreateProduct,
-  adminUpdateProduct
+  adminUpdateProduct,
+  adminUpload
 };
