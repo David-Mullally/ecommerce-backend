@@ -1,5 +1,6 @@
 const recordsPerPage = require("../config/pagination");
 const Product = require("../models/ProductModel");
+const imageValidation = require("../utils/imageValidation");
 
 const getProducts = async (req, res, next) => {
   try {
@@ -189,45 +190,61 @@ const adminCreateProduct = async (req, res, next) => {
 
 const adminUpdateProduct = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id).orFail()
-    const { name, description, count, price, category, attributesTable } = req.body
-    product.name = name || product.name
-    product.description = description || product.description
-    product.count = count || product.count
-    product.price = price || product.price
-    product.category = category || product.category
+    const product = await Product.findById(req.params.id).orFail();
+    const { name, description, count, price, category, attributesTable } =
+      req.body;
+    product.name = name || product.name;
+    product.description = description || product.description;
+    product.count = count || product.count;
+    product.price = price || product.price;
+    product.category = category || product.category;
     if (attributesTable.length > 0) {
-      product.attrs = []
+      product.attrs = [];
       attributesTable.map((item) => {
-        product.attrs.push(item)
-      })
+        product.attrs.push(item);
+      });
     } else {
       product.attrs = [];
     }
-    await product.save()
+    await product.save();
     res.json({
-      message: "Product updated successfully", product
-    })
+      message: "Product updated successfully",
+      product,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
 
 const adminUpload = async (req, res, next) => {
   try {
     if (!req.files || !!req.files.images === false) {
-      return res.status(400).send("No files were uploaded")
+      return res.status(400).send("No files were uploaded");
     }
+
+    const validationResult = imageValidation(req.files.images);
+    if (validationResult.error) {
+      return res.status(400).send(validationResult.error);
+    }
+    /* image paths should never be saved as the may contain dangerous code which could later be run on the server */
+    const path = require("path");
+    const {v4: uuidv4} = require("uuid")
+    let imagesTable = [];
+
     if (Array.isArray(req.files.images)) {
-      res.send(`You sent ${req.files.images.length} images`)
+      imagesTable = req.files.images
+    } else {
+      imagesTable.push(req.files.images)
     }
-    res.send("one image sent")
+
+    for (let image of imagesTable) {
+      console.log(path.extname(image.name))
+      console.log(uuidv4())
+    }
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
-
-
+};
 
 module.exports = {
   getProducts,
@@ -237,5 +254,5 @@ module.exports = {
   adminDeleteProduct,
   adminCreateProduct,
   adminUpdateProduct,
-  adminUpload
+  adminUpload,
 };
