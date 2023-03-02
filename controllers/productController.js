@@ -227,47 +227,66 @@ const adminUpload = async (req, res, next) => {
       return res.status(400).send(validationResult.error);
     }
     /* image paths should never be saved as the may contain dangerous code which could later be run on the server */
-    const path = require("path")
-    const { v4: uuidv4 } = require("uuid")
-    const uplaodDirectory = path.resolve(__dirname, "../../frontend", "public", "images", "products")
+    const path = require("path");
+    const { v4: uuidv4 } = require("uuid");
+    const uplaodDirectory = path.resolve(
+      __dirname,
+      "../../frontend",
+      "public",
+      "images",
+      "products"
+    );
 
-    let product = await Product.findById(req.query.productId).orFail()
+    let product = await Product.findById(req.query.productId).orFail();
 
     let imagesTable = [];
 
     if (Array.isArray(req.files.images)) {
-      imagesTable = req.files.images
+      imagesTable = req.files.images;
     } else {
-      imagesTable.push(req.files.images)
+      imagesTable.push(req.files.images);
     }
 
     for (let image of imagesTable) {
-      console.log(path.extname(image.name))
-      console.log(uuidv4())
-      var fileName = uuidv4() + path.extname(image.name)
-      var uploadPath = uplaodDirectory + "/" + fileName
-      product.images.push({path: "images/products/" + fileName })
+      console.log(path.extname(image.name));
+      console.log(uuidv4());
+      var fileName = uuidv4() + path.extname(image.name);
+      var uploadPath = uplaodDirectory + "/" + fileName;
+      product.images.push({ path: "images/products/" + fileName });
       image.mv(uploadPath, function (err) {
         if (err) {
-          return res.status(500).send(err)
+          return res.status(500).send(err);
         }
-      }) //this is a function of the express fileipload npm package
+      }); //this is a function of the express fileipload npm package
     }
-    await product.save()
-    return res.send("Files uploaded!")
-
+    await product.save();
+    return res.send("Files uploaded!");
   } catch (error) {
     next(error);
   }
 };
 
-const adminDeleteProductImage = (req, res, next) => {
-  const imagePath = decodeURIComponent(req.params.imagePath)
-  const path = require("path")
-  const finalPath = path.resolve("../frontend/public") + imagePath
-  console.log(finalPath)
-  return res.end()
-}
+const adminDeleteProductImage = async (req, res, next) => {
+  try {
+    const imagePath = decodeURIComponent(req.params.imagePath);
+    const path = require("path");
+    const finalPath = path.resolve("../frontend/public") + imagePath;
+    const fs = require("fs"); //built in fs = file system
+    fs.unlink(finalPath, (err) => {
+      if (err) {
+        res.status(500).send(err);
+      }
+    });
+
+    await Product.findOneAndUpdate(
+      { _id: req.params.productId },
+      { $pull: { images: { path: imagePath } } }
+    ).orFail();
+    return res.end();
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = {
   getProducts,
@@ -278,5 +297,5 @@ module.exports = {
   adminCreateProduct,
   adminUpdateProduct,
   adminUpload,
-  adminDeleteProductImage
+  adminDeleteProductImage,
 };
