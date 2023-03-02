@@ -261,6 +261,14 @@ const adminUpload = async (req, res, next) => {
   }
 };
 
+const adminDeleteProductImage = (req, res, next) => {
+  const imagePath = decodeURIComponent(req.params.imagePath)
+  const path = require("path")
+  const finalPath = path.resolve("../frontend/public") + imagePath
+  console.log(finalPath)
+  return res.end()
+}
+
 module.exports = {
   getProducts,
   getProductById,
@@ -270,4 +278,5 @@ module.exports = {
   adminCreateProduct,
   adminUpdateProduct,
   adminUpload,
+  adminDeleteProductImage
 };
