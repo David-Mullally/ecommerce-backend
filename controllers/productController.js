@@ -227,8 +227,12 @@ const adminUpload = async (req, res, next) => {
       return res.status(400).send(validationResult.error);
     }
     /* image paths should never be saved as the may contain dangerous code which could later be run on the server */
-    const path = require("path");
-    const {v4: uuidv4} = require("uuid")
+    const path = require("path")
+    const { v4: uuidv4 } = require("uuid")
+    const uplaodDirectory = path.resolve(__dirname, "../../frontend", "public", "images", "products")
+
+    let product = await Product.findById(req.query.productId).orFail()
+
     let imagesTable = [];
 
     if (Array.isArray(req.files.images)) {
@@ -240,7 +244,18 @@ const adminUpload = async (req, res, next) => {
     for (let image of imagesTable) {
       console.log(path.extname(image.name))
       console.log(uuidv4())
+      var fileName = uuidv4() + path.extname(image.name)
+      var uploadPath = uplaodDirectory + "/" + fileName
+      product.images.push({path: "images/products/" + fileName })
+      image.mv(uploadPath, function (err) {
+        if (err) {
+          return res.status(500).send(err)
+        }
+      }) //this is a function of the express fileipload npm package
     }
+    await product.save()
+    return res.send("Files uploaded!")
+
   } catch (error) {
     next(error);
   }
