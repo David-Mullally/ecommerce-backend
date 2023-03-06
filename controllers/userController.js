@@ -1,5 +1,6 @@
 const User = require("../models/UserModel");
 const { hashPassword } = require("../utils/hashPassword");
+const generateAuthToken = require("../utils/generateAuthToken")
 
 const getUsers = async (req, res, next) => {
   try {
@@ -29,7 +30,7 @@ const registerUser = async (req, res, next) => {
         password: hashedPassword,
       });
       res
-        .cookie("access_token", "fake access token", {
+        .cookie("access_token", generateAuthToken(user._id, user.name, user.lastName, user.email, user.isAdmin), {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "strict",
