@@ -13,7 +13,7 @@ const getUsers = async (req, res, next) => {
 
 const registerUser = async (req, res, next) => {
   try {
-    const { name, lastName, email, password } = req.body;
+    const { name, lastName, email, password, isAdmin } = req.body;
     if (!(name && lastName && email && password)) {
       return res.status(400).send("All fields are required");
     }
@@ -28,6 +28,7 @@ const registerUser = async (req, res, next) => {
         lastName,
         email: email.toLowerCase(),
         password: hashedPassword,
+        isAdmin,
       });
       res
         .cookie(
