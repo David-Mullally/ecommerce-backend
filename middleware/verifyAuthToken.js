@@ -21,4 +21,13 @@ const verifyIsLoggedIn = (req, res, next) => {
         next(err)
     }
 }
-module.exports = { verifyIsLoggedIn }
+
+const verifyIsAdmin = (req, res, next) => {
+    if (req.user && req.user.isAdmin) {
+        next()
+    } else {
+        return res.ststus(401).send("Unauthorized. Admin auth required")
+    }
+}
+
+module.exports = { verifyIsLoggedIn, verifyIsAdmin }
