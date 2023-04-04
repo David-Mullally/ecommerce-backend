@@ -73,7 +73,6 @@ const loginUser = async (req, res, next) => {
     const user = await User.findOne({ email });
 
     if (user && comparePasswords(password, user.password)) {
-      
       let cookieParams = {
         httOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -83,25 +82,66 @@ const loginUser = async (req, res, next) => {
       if (remainLoggedIn) {
         cookieParams = { ...cookieParams, maxAge: 1000 * 60 * 60 * 24 * 7 };
       }
-      return res.cookie(
-        "access_token",
-        generateAuthToken(
-          user._id,
-          user.name,
-          user.lastName,
-          user.email,
-          user.isAdmin
-        ),
-        cookieParams
-      ).json({
-        success: "user logged in",
-        userLoggedIn: {_id: user._id, name: user.name, lastName: user.lastName, email: user.email,isAdmin: user.isAdmin, remainLoggedIn: user.remainLoggedIn}
-      });
+      return res
+        .cookie(
+          "access_token",
+          generateAuthToken(
+            user._id,
+            user.name,
+            user.lastName,
+            user.email,
+            user.isAdmin
+          ),
+          cookieParams
+        )
+        .json({
+          success: "user logged in",
+          userLoggedIn: {
+            _id: user._id,
+            name: user.name,
+            lastName: user.lastName,
+            email: user.email,
+            isAdmin: user.isAdmin,
+            remainLoggedIn: user.remainLoggedIn,
+          },
+        });
     } else {
-      res.status(401).send("wrong credentials")
+      res.status(401).send("wrong credentials");
     }
   } catch (error) {
     next(error);
   }
 };
-module.exports = { getUsers, registerUser, loginUser };
+
+const updateUserProfile = async (req, res, next) => {
+  try {
+    const user = await User.finfById(req.user._id).orFail();
+    user.name = req.body.name || user.name;
+    user.lastname = req.body.lastName || user.lastName;
+    user.email = req.body.email || user.email;
+    user.phoneNumber = req.body.phoneNumber;
+    user.address = req.body.address;
+    user.country = req.body.country;
+    user.zipCode = req.body.zipCode;
+    user.city = req.body.city;
+    user.state = req.body.state;
+    if (req.body.password !== user.password) {
+      user.password = hashPassword(req.body.password);
+    }
+    await user.save();
+
+    res.json({
+      success: "user updated",
+      userUpdated: {
+        _id: user._id,
+        name: user.name,
+        lastName: user.lastName,
+        email: user.email,
+        isAdmin: user.isAdmin,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+module.exports = { getUsers, registerUser, loginUser, updateUserProfile};
