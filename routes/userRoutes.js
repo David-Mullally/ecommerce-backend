@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const {verifyIsLoggedIn, verifyIsAdmin} = require("../middleware/verifyAuthToken")
-const { getUsers, registerUser, loginUser, updateUserProfile, getUserProfile, writeReview, getUser } = require("../controllers/userController")
+const { getUsers, registerUser, loginUser, updateUserProfile, getUserProfile, writeReview, getUser, updateUser } = require("../controllers/userController")
 
 
 
@@ -19,5 +19,6 @@ router.post('/review/:productId', writeReview);
 router.use(verifyIsAdmin);
 router.get("/", getUsers);
 router.get("/:id", getUser);
+router.put("/:id", updateUser)
 
 module.exports = router
