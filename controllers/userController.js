@@ -216,4 +216,13 @@ const writeReview = async (req, res, next) => {
   }
 }
 
-module.exports = { getUsers, registerUser, loginUser, updateUserProfile, getUserProfile, writeReview};
+const getUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).select(" name lastName email isAdmin").orFail();
+    return res.send(user);
+  } catch (err) {
+    next(err)
+  }
+}
+
+module.exports = { getUsers, registerUser, loginUser, updateUserProfile, getUserProfile, writeReview, getUser};
