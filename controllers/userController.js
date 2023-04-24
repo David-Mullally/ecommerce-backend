@@ -243,4 +243,14 @@ const updateUser = async(req, res, next) => {
   }
 }
 
-module.exports = { getUsers, registerUser, loginUser, updateUserProfile, getUserProfile, writeReview, getUser, updateUser};
+const deleteUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id).orFail();
+    await user.remove();
+    res.send("user removed");
+  } catch(err) {
+    next(err)
+  }
+}
+
+module.exports = { getUsers, registerUser, loginUser, updateUserProfile, getUserProfile, writeReview, getUser, updateUser, deleteUser};
