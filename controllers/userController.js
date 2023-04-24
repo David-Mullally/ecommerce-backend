@@ -158,6 +158,10 @@ const getUserProfile = async(req, res, next) => {
 
 const writeReview = async (req, res, next) => {
   try {
+ 
+    //wrap create review in a transaction
+    const session = await Review.startSession();
+
     // get commit, rating from req.body:
     const { comment, rating } = req.body;
     // validate request:
@@ -170,6 +174,7 @@ const writeReview = async (req, res, next) => {
     let reviewId = ObjectId();
     console.log(ObjectId, reviewId);
 
+    session.startTransaction();
     await Review.create([
       {
         _id: reviewId,
@@ -177,12 +182,14 @@ const writeReview = async (req, res, next) => {
         rating: Number(rating),
         user: { _id: req.user._id, name: req.user.name + " " + req.user.lastName },
       }
-    ])
+    ], {session: session})
 
-    const product = await Product.findById(req.params.productId).populate("reviews");
+    const product = await Product.findById(req.params.productId).populate("reviews").session(session);
 
     const alreadyReviewed = product.reviews.find((r) => r.user._id.toString() === req.user._id.toString());
     if (alreadyReviewed) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).send("You have already reviewed this product");
     }
 
@@ -199,8 +206,12 @@ const writeReview = async (req, res, next) => {
 
     await product.save();
 
+
+    await session.commitTransaction();
+    session.endSession();
     res.send("review created")
-  } catch(err) {
+  } catch (err) {
+    await session.abortTransaction();
     next(err)
   }
 }
