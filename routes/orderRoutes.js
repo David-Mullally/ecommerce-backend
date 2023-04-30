@@ -9,6 +9,7 @@ const {
   getOrder,
   createOrder,
   updateOrderToPaid,
+  updateOrderToDelivered
 } = require("../controllers/orderController");
 
 // user routes
@@ -16,9 +17,10 @@ router.use(verifyIsLoggedIn);
 router.get("/", getUserOrders);
 router.get("/user/:id", getOrder);
 router.post("/", createOrder);
-router.patch("/paid/:id", updateOrderToPaid);
+router.put("/paid/:id", updateOrderToPaid);
 
 //admin routes
 router.use(verifyIsAdmin);
+router.put("/deliverd/:id", updateOrderToDelivered)
 
 module.exports = router;

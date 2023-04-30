@@ -60,15 +60,34 @@ const createOrder = async (req, res, next) => {
 
 const updateOrderToPaid = async (req, res, next) => {
   try {
-      const order = await Order.findById(req.params.id).orFail();
-      order.isPaid = true;
-      order.paidAt = Date.now();
+    const order = await Order.findById(req.params.id).orFail();
+    order.isPaid = true;
+    order.paidAt = Date.now();
 
-      const updatedOrder = await order.save();
-      res.send(updatedOrder);
+    const updatedOrder = await order.save();
+    res.send(updatedOrder);
   } catch (err) {
     next(err);
   }
 };
 
-module.exports = { getUserOrders, getOrder, createOrder, updateOrderToPaid };
+const updateOrderToDelivered = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id).orFail();
+    order.isDelivered = true;
+    order.deliveredAt = Date.now();
+
+    const updatedOrder = await order.save();
+    res.send(updatedOrder);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = {
+  getUserOrders,
+  getOrder,
+  createOrder,
+  updateOrderToPaid,
+  updateOrderToDelivered,
+};
