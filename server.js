@@ -28,16 +28,23 @@ app.use("/api", apiRoutes);
 
 //show errors in the console
 app.use((error, req, res, next) => {
-  console.log(error);
-  res.status(500).json({
-    message: error.message,
-    stack: error.stack,
-  });
+  if (process.env.NODE_ENV === "development") {
+    console.log(error);
+  }
+  next(error);
 });
 
 app.use((error, req, res, next) => {
-  console.log(error);
-  next(error);
+  if (process.env.NODE_ENV === "development") {
+    res.status(500).json({
+      message: error.message,
+      stack: error.stack,
+    });
+  } else {
+    res.status(500).json({
+      message: error.message,
+    })
+  }
 });
 
 app.listen(port, () => {
