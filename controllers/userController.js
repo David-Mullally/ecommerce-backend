@@ -67,12 +67,12 @@ const registerUser = async (req, res, next) => {
 
 const loginUser = async (req, res, next) => {
   try {
-    const { email, password, remainLoggedIn } = req.body;
+    const { email, password, doNotLogout } = req.body;
     if (!(email && password)) {
       return res.status(400).send("all fields are required");
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).orFail();
 
     if (user && comparePasswords(password, user.password)) {
       let cookieParams = {
@@ -81,7 +81,7 @@ const loginUser = async (req, res, next) => {
         sameSite: "strict",
       };
 
-      if (remainLoggedIn) {
+      if (doNotLogout) {
         cookieParams = { ...cookieParams, maxAge: 1000 * 60 * 60 * 24 * 7 };
       }
       return res
@@ -104,7 +104,7 @@ const loginUser = async (req, res, next) => {
             lastName: user.lastName,
             email: user.email,
             isAdmin: user.isAdmin,
-            remainLoggedIn: user.remainLoggedIn,
+            doNotLogout: user.doNotLogout,
           },
         });
     } else {
