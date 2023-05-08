@@ -9,6 +9,10 @@ const orderRoutes = require("./orderRoutes")
 
 
 const jwt = require("jsonwebtoken")
+
+app.get("/logout", (req, res, next) => {
+    return res.clearCookie("access_token").send("access token cleared");
+})
 app.get("/get-token", (req, res) => {
     try {
         const accessToken = req.cookies["access_token"]
