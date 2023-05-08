@@ -84,6 +84,7 @@ const loginUser = async (req, res, next) => {
       if (doNotLogout) {
         cookieParams = { ...cookieParams, maxAge: 1000 * 60 * 60 * 24 * 7 };
       }
+      const newLocal = "user logged in";
       return res
         .cookie(
           "access_token",
@@ -97,7 +98,7 @@ const loginUser = async (req, res, next) => {
           cookieParams
         )
         .json({
-          success: "user logged in",
+          success: newLocal,
           userLoggedIn: {
             _id: user._id,
             name: user.name,
