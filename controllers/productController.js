@@ -143,7 +143,7 @@ const getBestsellers = async (req, res, next) => {
 
 const adminGetProducts = async (req, res, next) => {
   try {
-    console.log(req.user)
+    console.log(req.user);
     const products = await Product.find({})
       .sort({ category: 1 })
       .select("name price category");
@@ -219,6 +219,16 @@ const adminUpdateProduct = async (req, res, next) => {
 
 const adminUpload = async (req, res, next) => {
   try {
+    if (req.query.cloudinary === "true") {
+      try {
+        let product = await Product.findById(req.query.productId).orFail();
+        product.images.push({ path: req.body.url });
+        await product.save();
+      } catch(err) {
+        next(err);
+      }
+      return;
+    }
     if (!req.files || !!req.files.images === false) {
       return res.status(400).send("No files were uploaded");
     }
