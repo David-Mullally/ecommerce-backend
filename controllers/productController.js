@@ -224,7 +224,7 @@ const adminUpload = async (req, res, next) => {
         let product = await Product.findById(req.query.productId).orFail();
         product.images.push({ path: req.body.url });
         await product.save();
-      } catch(err) {
+      } catch (err) {
         next(err);
       }
       return;
@@ -278,8 +278,20 @@ const adminUpload = async (req, res, next) => {
 };
 
 const adminDeleteProductImage = async (req, res, next) => {
+  const imagePath = decodeURIComponent(req.params.imagePath);
+  if (req.query.cloudinary === "true") {
+    try {
+      await Product.findOneAndUpdate(
+        { _id: req.params.productId },
+        { $pull: { images: { path: imagePath } } }
+      ).orFail();
+      return res.send
+    } catch (er) {
+      next(er);
+    }
+    return;
+  }
   try {
-    const imagePath = decodeURIComponent(req.params.imagePath);
     const path = require("path");
     const finalPath = path.resolve("../frontend/public") + imagePath;
     const fs = require("fs"); //built in fs = file system
