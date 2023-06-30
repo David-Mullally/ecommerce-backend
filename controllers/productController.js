@@ -191,6 +191,7 @@ const adminCreateProduct = async (req, res, next) => {
 
 const adminUpdateProduct = async (req, res, next) => {
   try {
+    console.log(req.params.id)
     const product = await Product.findById(req.params.id).orFail();
     const { name, description, count, price, category, attributesTable } =
       req.body;
