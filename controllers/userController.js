@@ -22,7 +22,7 @@ const registerUser = async (req, res, next) => {
 
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({error:"user already exists"});
+      return res.status(400).json({ error: "user already exists" });
     } else {
       const hashedPassword = hashPassword(password);
       const user = await User.create({
@@ -147,18 +147,17 @@ const updateUserProfile = async (req, res, next) => {
   }
 };
 
-const getUserProfile = async(req, res, next) => {
+const getUserProfile = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id).orFail();
     return res.send(user);
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};
 
 const writeReview = async (req, res, next) => {
   try {
- 
     //wrap create review in a transaction
     const session = await Review.startSession();
 
@@ -175,18 +174,28 @@ const writeReview = async (req, res, next) => {
     console.log(ObjectId, reviewId);
 
     session.startTransaction();
-    await Review.create([
-      {
-        _id: reviewId,
-        comment: comment,
-        rating: Number(rating),
-        user: { _id: req.user._id, name: req.user.name + " " + req.user.lastName },
-      }
-    ], {session: session})
+    await Review.create(
+      [
+        {
+          _id: reviewId,
+          comment: comment,
+          rating: Number(rating),
+          user: {
+            _id: req.user._id,
+            name: req.user.name + " " + req.user.lastName,
+          },
+        },
+      ],
+      { session: session }
+    );
 
-    const product = await Product.findById(req.params.productId).populate("reviews").session(session);
+    const product = await Product.findById(req.params.productId)
+      .populate("reviews")
+      .session(session);
 
-    const alreadyReviewed = product.reviews.find((r) => r.user._id.toString() === req.user._id.toString());
+    const alreadyReviewed = product.reviews.find(
+      (r) => r.user._id.toString() === req.user._id.toString()
+    );
     if (alreadyReviewed) {
       await session.abortTransaction();
       session.endSession();
@@ -201,31 +210,36 @@ const writeReview = async (req, res, next) => {
       product.reviewsNumber = 1;
     } else {
       product.reviewsNumber = product.reviews.length;
-      product.rating = prc.map((item) => Number(item.rating)).reduce((sum, item) => sum + item, 0) / product.reviews.length;
+      let ratingCalc =
+        prc
+          .map((item) => Number(item.rating))
+          .reduce((sum, item) => sum + item, 0) / product.reviews.length;
+      product.rating = Math.round(ratingCalc);
     }
 
     await product.save();
 
-
     await session.commitTransaction();
     session.endSession();
-    res.send("review created")
+    res.send("review created");
   } catch (err) {
     await session.abortTransaction();
-    next(err)
+    next(err);
   }
-}
+};
 
 const getUser = async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.id).select(" name lastName email isAdmin").orFail();
+    const user = await User.findById(req.params.id)
+      .select(" name lastName email isAdmin")
+      .orFail();
     return res.send(user);
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};
 
-const updateUser = async(req, res, next) => {
+const updateUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id).orFail();
 
@@ -237,20 +251,29 @@ const updateUser = async(req, res, next) => {
     await user.save();
 
     res.send("user updated");
-
   } catch (err) {
-    next(err)
+    next(err);
   }
-}
+};
 
 const deleteUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id).orFail();
     await user.remove();
     res.send("user removed");
-  } catch(err) {
-    next(err)
+  } catch (err) {
+    next(err);
   }
-}
+};
 
-module.exports = { getUsers, registerUser, loginUser, updateUserProfile, getUserProfile, writeReview, getUser, updateUser, deleteUser};
+module.exports = {
+  getUsers,
+  registerUser,
+  loginUser,
+  updateUserProfile,
+  getUserProfile,
+  writeReview,
+  getUser,
+  updateUser,
+  deleteUser,
+};
