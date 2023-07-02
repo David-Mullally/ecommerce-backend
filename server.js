@@ -1,17 +1,23 @@
 const { createServer } = require("http");
-const {Server} = require("socket.io");
+const { Server } = require("socket.io");
 const express = require("express");
-const fileUpload = require("express-fileupload")
-const cookieParser = require("cookie-parser")
+const fileUpload = require("express-fileupload");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 
 const httpServer = createServer(app);
 global.io = new Server(httpServer);
 
-app.use(express.json())
-app.use(cookieParser())
-app.use(fileUpload())
+app.use(express.json());
+app.use(cookieParser());
+app.use(fileUpload());
+
+io.on("connection", (socket) => {
+  socket.on("client sends message", (msg) => {
+    console.log(msg);
+  });
+});
 
 const apiRoutes = require("./routes/apiRoutes");
 
@@ -46,10 +52,10 @@ app.use((error, req, res, next) => {
   } else {
     res.status(500).json({
       message: error.message,
-    })
+    });
   }
 });
 
 const PORT = process.eventNames.PORT || 5000;
 
-httpServer.listen(PORT, ()=>console.log(`Server running on port ${PORT}`))
+httpServer.listen(PORT, () => console.log(`Server running on port ${PORT}`));
