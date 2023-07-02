@@ -103,7 +103,7 @@ const getOrderForAnalysis = async (req, res, next) => {
     end.setHours(23, 59, 59, 999);
 
       const order = await Order.find({
-          created: {
+          createdAt: {
               $gte: start,
               $lte: end,
           },

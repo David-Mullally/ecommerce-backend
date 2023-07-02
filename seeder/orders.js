@@ -30,7 +30,7 @@ const orders = Array.from({ length: 22 }).map((_, idx) => {
     paymentMethod: "PayPal",
     isPaid: false,
     isDelivered: false,
-    createdAt: `2023-02-${day}T${hour}:12:36.490+00:00`,
+    createdAt: `2023-02-07T00:12:36.490+00:00`,
   };
 });
 

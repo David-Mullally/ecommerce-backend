@@ -14,6 +14,7 @@ const products = [
     reviewsNumber: 5,
     reviews: [],
     attrs: [{ key: "color", value: "blue" }],
+    sales: 100,
   },
   {
     name: "Product2 Lenovo Comp2 Name Lorem ipsum dolor sit amet",
@@ -112,6 +113,7 @@ const products = [
     rating: 4,
     reviewsNumber: 8,
     reviews: [],
+    sales: 50,
   },
   {
     name: "Product8 Tablet Name Lorem ipsum dolor sit amet",
