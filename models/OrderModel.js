@@ -54,7 +54,6 @@ const orderSchema = mongoose.Schema(
 
 const Order = mongoose.model("Order", orderSchema);
 Order.watch().on("change", (data) => {
-  console.log(data.operationType);
   if (data.operationType === "insert") {
     io.emit("newOrder", data.fullDocument)
   }
