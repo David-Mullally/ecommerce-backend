@@ -16,8 +16,8 @@ app.use(fileUpload());
 const admins = [];
 let activeChats = [];
 function get_random(array) {
-  return array[Math.floor(Math.random()* array.length)]
-};
+  return array[Math.floor(Math.random() * array.length)];
+}
 
 io.on("connection", (socket) => {
   socket.on("admin connected with server", (adminName) => {
@@ -28,22 +28,26 @@ io.on("connection", (socket) => {
       socket.emit("no admin here now", "");
     } else {
       let client = activeChats.find((client) => client.clientId === socket.id);
-      let targetAdminId; 
+      let targetAdminId;
       if (client) {
         targetAdminId = client.adminId;
       } else {
         let admin = get_random(admins);
         activeChats.push({ clientId: socket.id, adminId: admin.id });
         targetAdminId = admin.id;
-      };
-      socket.broadcast.to(targetAdminId).emit("server sends message from client to admin", {
-        user: socket.id,
-        message: msg,
-      });
+      }
+      socket.broadcast
+        .to(targetAdminId)
+        .emit("server sends message from client to admin", {
+          user: socket.id,
+          message: msg,
+        });
     }
   });
-  socket.on("admin sends message", ({ user,message }) => {
-    socket.broadcast.to(user).emit("server sends message from admin to client", message);
+  socket.on("admin sends message", ({ user, message }) => {
+    socket.broadcast
+      .to(user)
+      .emit("server sends message from admin to client", message);
   });
   socket.on("disconnect", (reason) => {
     //admin disconnected
@@ -51,6 +55,13 @@ io.on("connection", (socket) => {
     if (removeIndex !== -1) {
       admins.splice(removeIndex, 1);
     }
+    activeChats = activeChats.filter((item) => item.adminId === socket.id);
+    //client disconnected
+    const removeIndexClient = activeChats.findIndex((item) => item.clientId === socket.id);
+    if(removeIndexClient !== -1){
+      activeChats.splice(removeIndexClient, 1);
+    }
+    socket.broadcast.emit("disconnected", {reason: reason, socketId: socket.id})
   });
 });
 
