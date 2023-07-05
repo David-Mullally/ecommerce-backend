@@ -10,7 +10,7 @@ const getProducts = async (req, res, next) => {
 
     if (req.query.price) {
       queryCondition = true;
-      priceQueryCondition = { price: { $lte: req.query.price } };
+      priceQueryCondition = { price: { $lte: Number(req.query.price) } };
     }
 
     let ratingQueryCondition = {};
@@ -27,7 +27,6 @@ const getProducts = async (req, res, next) => {
       let a = categoryName.replaceAll(",", "/");
       var regEx = new RegExp("^" + a);
       categoryQueryCondition = { category: regEx };
-      console.log(regEx);
     }
 
     if (req.query.category) {
@@ -51,7 +50,6 @@ const getProducts = async (req, res, next) => {
           let a1 = {
             attrs: { $elemMatch: { key: a[0], value: { $in: values } } },
           };
-          console.log(values);
           acc.push(a1);
           //console.dir(acc, { depth: null })
           return acc;
@@ -195,6 +193,7 @@ const adminUpdateProduct = async (req, res, next) => {
     const product = await Product.findById(req.params.id).orFail();
     const { name, description, count, price, category, attributesTable } =
       req.body;
+    product._id = req.params.id;
     product.name = name || product.name;
     product.description = description || product.description;
     product.count = count || product.count;
