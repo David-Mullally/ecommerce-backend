@@ -49,6 +49,12 @@ io.on("connection", (socket) => {
       .to(user)
       .emit("server sends message from admin to client", message);
   });
+
+  socket.on("admin closes chat", (socketId) => {
+    socket.braodcast.to(socketId).emit("admin closed chat", "");
+    let c = io.sockets.sockets.get(socketId);
+    c.disconnect(); // server namespace disconnect
+  })
   socket.on("disconnect", (reason) => {
     //admin disconnected
     const removeIndex = admins.findIndex((item) => item.id === socket.id);
